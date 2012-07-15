@@ -103,4 +103,15 @@ function removeCSSTransitions() {
 function addCSSTransitions() {
     $carousel.find('.carousel-container').first().css({ transitionProperty: 'left' });
 }
-
+/**
+ * Calculates values for the positions array based on width of elements in carousel.
+ */
+function calculatePositions() {
+    $carousel.find('.carousel-container .carousel-item').each(function(i, v) {
+        var value = $(this).width();
+        if (positions[i - 1]) {
+            value += positions[i - 1];
+        }
+        positions.push(value);
+    });
+}
