@@ -1,20 +1,17 @@
 (function($) {
     $('form[data-givalidates]').submit( function() {
-        $(this).find('input[type="text"]').each( function() {
+        $(this).find('input[data-validates]').each( function() {
             // Each validation must be put on the function
         });
     });
     function validateEmail($input) {
-        var defaultValue = $input.data('defaultvalue');
-        if ($input.val() == defaultValue) return false;
-
         if ($input.val().match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i)) {
         } else {
+            $input.addClass('error');
             return false;
         }
     }
     function validatePresence($input) {
-        var defaultValue = $input.data('defaultvalue');
         if ($input.val() == defaultValue) return false;
         if (!$input.val()) return false;
     }
@@ -25,7 +22,32 @@
     function validatePhoneNumber($input) {
         var defaultValue = $input.data('defaultvalue');
         if ($input.val() == defaultValue) return false;
+        if ($input.val().match()) {
+            return true;
+        } else {
+            return false;
+        }
     }
+    function error($input) {
+        $input.addClass('error');
+    }
+    // Description of process:
+    // when form is submitted {
+    //      loop through inputs (data-validates='email zip presence [some space delimited args]") {
+    //          var validated = true;
+    //          var validations = $(this).data('validates').split(' ');
+    //          validations.each do |x| {
+    //              if !validations[x]() {
+    //                  $input.addClass('error');
+    //                  validated = false;
+    //                  break;
+    //              }
+    //          }
+    //      }
+    //      when finished erroring inputs, return validated to end form submission
+    // }
+    // all I have to do is define validation methods and prototype them to jQuery
+    //
 })(jQuery);
 
 
