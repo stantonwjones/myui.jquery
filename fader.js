@@ -1,5 +1,6 @@
 /**
  * Fading Carousel
+ * Should eventually be wrapped into Carousel.js
  */
 (function($) {
     window.genuineFader = function(overrides) {
