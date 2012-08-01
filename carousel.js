@@ -1,47 +1,23 @@
 /**
  * Carousel
  */
-
-(function($){
-    $(document).ready(initCarousel);
-
-    function initFader() {
-        var ANIMATION_DURATION = 300;
-        var TRANSITION_INTERVAL = 2000;
-
-        var $fader = $('ul.fader').first();
-        var $currentItem = $fader.children('li').first();
-
-        window.setInterval(transition, TRANSITION_INTERVAL);
-
-        function transition() {
-            $currentItem.fadeOut(ANIMATION_DURATION);
-            setCurrentItem();
-            $currentItem.fadeIn(ANIMATION_DURATION);
-        }
-
-        function setCurrentItem() {
-            if ($currentItem.next('li')[0]) {
-                $currentItem = $currentItem.next('li');
-            } else {
-                $currentItem = $fader.children('li').first();
-            }
-        }
-    }
-})(jQuery);
-
 //---- Sandbox ----//
+//TODO: extend jQuery
 
 function Carousel( $carousel, options ) {
-    var $carouselWindow;    // Dom object displaying only the desired carousel items
-    var $carousel;
-    var currentPosition;    // Number representing currentPosition
+    var $carouselWindow;    // Dom object displaying only the desired carousel items.  Basically a wrapper
+    var $carousel;          // Actual container of the list of items
+    var $carouselItems;     // For carousel items
+    var numItems;           // Stores the number of unique carousel items
+    var currentPosition;    // Number representing currentPosition TODO: Replace Position w/ Index for symantics
+    var viewWidth;          // width which allows us to see items
     var positions = [];     // Array of values for left
+    var carouselObj = {};    // Object exposing carosel functionality.  TODO: Replace this with OOP JS
 
     // Set hash of default values
     var defaults = {
-        animationDuration: ANIMATION_DURATION, //replace these values throughout code
-        transitionInterval: TRANSITION_INTERVAL, // ditto ^
+        animationDuration: 500, //replace these values throughout code
+        transitionInterval: 0, // ditto ^
         childSelector: 'li',
         numShowing: 3,
         afterTransition: nullFunction,
@@ -50,14 +26,25 @@ function Carousel( $carousel, options ) {
         prevButton: null
     }
 
-    var settings = $.extend({}, defaults, overrides);
+    var settings = $.extend({}, defaults, options);
 
     /**
      * Initiates carousel
      */
     function init() {
+        $carouselItems = $carousel.children(settings.childSelector);
         calculatePositions();
-        $carouselWindow = $carousel.wrap('div');
+        $carouselWindow = $carousel.wrap('div'); // TODO: add other styling indicators to this item
+    }
+
+    /**
+     * Clones carousel items for extending carousel.  Call this once in the init function.
+     */
+    function extend() {
+        $carouselItems.clone()
+        .appendTo($carousel)
+        .clone()
+        .prependTo($carousel);
     }
 
     /**
@@ -65,7 +52,7 @@ function Carousel( $carousel, options ) {
      */
     function next() {
         currentPosition++;
-        $carousel.css({left: positions[currentPosition] });
+        transition();
     }
 
     /**
@@ -73,7 +60,7 @@ function Carousel( $carousel, options ) {
      */
     function prev() {
         currentPosition--;
-        $carousel.css({ left: positions[currentPosition] });
+        transition();
     }
 
     /**
@@ -85,10 +72,10 @@ function Carousel( $carousel, options ) {
         // Wraparound logic
         var wraparound = false;
         if (currentPosition == 1) {
-            currentPostion += positions.length;
+            currentPostion += numItems;
             wraparound = true;
         } else if (currentPosition == positions.length - 2) {
-            currentPosition -= positions.length;
+            currentPosition -= numItems;
             wraparound = true;
         }
         if (wraparound) {
@@ -149,9 +136,14 @@ function Carousel( $carousel, options ) {
     }
 
     /**
-     * Null function
+     * Null function TODO: why do I need this?
      */
     function nullFunction() {
         return null;
     }
+
+    return {
+        next: next,
+        prev: prev
+    };
 }
