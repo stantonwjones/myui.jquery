@@ -8,23 +8,29 @@
 
     // Jack this format from srobbin's jquery-backstretch
     // However, want this to operate on any image tag as well
-    $.backstretch = function( source, selector) {
-        if (!resizeSet) {
-            $(window).on('resize.backstretch', resizeImages);
+    $.backstretch = function( source, options) {
+        var defaults = {
+            beforeBackstretch: function() {},
+            afterBackstretch: function() {},
+            containerCSS: {
+                position: 'absolute', // use check to see if browser supports fixed
+                display: none,
+                left: 0,
+                top: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: -999999,
+                padding: 0,
+                margin: 0
+            }
         }
+        var settings = $.extend(true, {}, defaults, options);
         var $img, imgHeight, imgWidth, imgRatio;
 
         // Find or append container div
-        var containerCSS = {
-            position: 'absolute', // use check to see if browser supports fixed
-            display: none,
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: -999999,
-            padding: 0,
-            margin: 0
+        if (!resizeSet) {
+            $(window).on('resize.backstretch', resizeImages);
+            resizeSet = true;
         }
         if (!$($conainer).length) {
             $container = $('div').attr('id', 'backstretch').css(containerCSS).appendTo(document.body);
@@ -38,7 +44,8 @@
         }
         function resizeImage($img) {
             var css = {
-                position: relative,
+                position: 'absolute',
+                display: 'block',
                 left: 0,
                 top: 0
             }

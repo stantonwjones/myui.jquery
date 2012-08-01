@@ -32,7 +32,7 @@
 
 //---- Sandbox ----//
 
-function Carousel( $carousel, overrides ) {
+function Carousel( $carousel, options ) {
     var $carouselWindow;    // Dom object displaying only the desired carousel items
     var $carousel;
     var currentPosition;    // Number representing currentPosition
