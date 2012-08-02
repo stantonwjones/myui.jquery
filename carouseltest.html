@@ -42,5 +42,15 @@
             <li class="black"></li>
             <li class="purple"></li>
         </ul>
+        <script type="text/javascript">
+            var carousel;
+            $(function() {
+                    console.log($('.carousel'));
+                    carousel = Carousel( $('.carousel') );
+            });
+            $(document.body).click( function() {
+                    carousel.next();
+            });
+        </script>
     </BODY>
 </HTML>
