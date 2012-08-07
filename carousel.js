@@ -1,5 +1,5 @@
 /**
- * Cycler
+ * Carousel
  *
  * Description of process::
  *      1. init items in a div acting as the window
@@ -40,7 +40,7 @@ function Carousel( $carousel, options ) {
         prevButton: null
     }
 
-    var settings = $.extend({}, defaults, options);
+    var settings = $.extend( {}, defaults, options );
     console.log(settings);
     init();
 

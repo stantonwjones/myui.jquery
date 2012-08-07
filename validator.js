@@ -1,9 +1,98 @@
+/**
+ * Form validation library:
+ *  $.validates => object level namespace
+ *      ()          => shorthand for allForms TODO: implement this
+ *      .allForms() => performs validations on all forms and their inputs TODO: implement this
+ *
+ *  $.fn.validates => prototypal namespace
+ *      () => sets up form validations for this collection
+ *      .on() => TODO: backlogged item... maybe change event on which validations are performed (in addition to submit)
+ *      .for() => pass the validation options to check. f/e 'presence email'.  should only work on an input/select/textarea
+ *
+ */
 (function($) {
-    $('form[data-givalidates]').submit( function() {
-        $(this).find('input[data-validates]').each( function() {
-            // Each validation must be put on the function
+    // Hash which maps validation stings to the functions which determine validation
+    $.validations = {};
+    $.fn.validates = function() {
+    };
+
+    var validationFunctions = {
+        zip: validateZip,
+        email: validateEmail,
+        phone: validatePhoneNumber,
+        presence: validatePresence
+    }
+
+    var defaults = {
+        onValidated: function() {},     // called when an input passes validations and recieves that input as an argument
+        onInvalidated: function() {},   // called when an input fails validation and recieves that input as an argument
+        onSuccess: function() {},       // called when a form passes validation and recieves that form as an argument
+        onError: function() {}          // called when a form fails validation and recieves that form as an argument
+    }
+
+    var settings = $.extend({}, defaults, options);
+
+    //  Abstract this out to a function on the jQuery object (maybe just a global function);
+    //  TODO: an exposed version of this function which can be called on an individual form
+    $('form[data-givalidates]').submit(validateForm);
+
+    /**
+     * Validates a single form.  Assumes that it is being called from within the scope of the form object.
+     */
+    function validateForm() {
+        var validated = true;
+        var validations;
+
+        // May want to expand this to textAreas and select dropdowns...
+        $(this).find('input[data-validates]').each(function() {
+            // $(this) now refers to the input objects in the form
+            var inputValidated = true;
+            validations = $(this).data('validates').split(' ');
+            for (var i in validations) {
+                try {
+                    if (!validationFunctions[validations[i]]($(this))) {
+                        settings.onInvalidated($(this));
+                        inputValidated = validated = false;
+                        break;
+                    }
+                } catch (e) {
+                    console.error(e.description);
+                    console.error("Invalid validation argument: ", validates[i]);
+                }
+            }
+            if (inputValidated) settings.onValidated($(this));
         });
-    });
+
+        // After iterating through each input, return the validated state, and perform any onError, or onSuccess functions
+        if (validated) {
+            return onSuccess();
+        } else {
+            return onError();
+        }
+    }
+
+    /**
+     * Calls the onSuccess callback and returns true (allowing the form to submit).
+     */
+    function onSuccess() {
+        settings.onSuccess();
+        return true;
+    }
+
+    /**
+     * Calls the onError callback and returns false (preventing the form from submitting).
+     */
+    function onError() {
+        settings.onError();
+        return false;
+    }
+
+    /************
+     *
+     *  VALIDATIONS DEFINED HERE
+     *
+     */
+
     function validateEmail($input) {
         if ($input.val().match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i)) {
         } else {
@@ -16,8 +105,8 @@
         if (!$input.val()) return false;
     }
     function validateZip($input) {
-        var defaultValue = $input.data('defaultvalue');
-        if ($input.val() == defaultValue) return false;
+        if (!$input.val()) return true;
+        if ($input.val().match(/(^|[^\d])\d{5}[^\d]/)) return true;
     }
     function validatePhoneNumber($input) {
         var defaultValue = $input.data('defaultvalue');
@@ -28,57 +117,4 @@
             return false;
         }
     }
-    function error($input) {
-        $input.addClass('error');
-    }
-    // Description of process:
-    // when form is submitted {
-    //      loop through inputs (data-validates='email zip presence [some space delimited args]") {
-    //          var validated = true;
-    //          var validations = $(this).data('validates').split(' ');
-    //          validations.each do |x| {
-    //              if !validations[x]() {
-    //                  $input.addClass('error');
-    //                  validated = false;
-    //                  break;
-    //              }
-    //          }
-    //      }
-    //      when finished erroring inputs, return validated to end form submission
-    // }
-    // all I have to do is define validation methods and prototype them to jQuery
-    //
 })(jQuery);
-
-
-/* JS used for contact-us form validation on harvard vanguard
-    // Calidates the Contact Us form if it exists on the page
-    function validateContactForm() {
-        $('#contactForm').submit(function() {
-            return validatePresence($(this).find('#name')) && validateEmail($(this).find('#email')) && validateFormat($(this).find('#phone'));
-        });
-
-        function validatePresence($input) {
-            if ($input.val()) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        function validateEmail($input) {
-            if ($input.val().match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        function validateFormat($input) {
-            if (!$input.val()) return true;
-            if ($input.val().match(/^\d\.\d{3}\.\d{3}\.\d{4}$/) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
-    */
