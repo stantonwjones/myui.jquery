@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript" src="../validator.js"></script>
+    </head>
+    <body>
+        <form>
+            <label>Email</label>
+            <input type="text" data-validates="email presence" />
+            <input type="submit" />
+        </form>
+        <script>
+            $('form').submit(function(e) {
+                e.preventDefault();
+            });
+            $.setValidations();
+        </script>
+    </body>
+</html>

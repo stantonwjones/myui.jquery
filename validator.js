@@ -11,10 +11,12 @@
  *
  */
 (function($) {
-    // Hash which maps validation stings to the functions which determine validation
-    $.validations = {};
-    $.fn.validates = function() {
-    };
+    // jQuery Bindings
+    $.setValidations = validateAllForms;
+    $.setValidations.allForms = validateAllForms;
+
+    $.fn.setValidations = jQueryValidatesForm;
+    //$.fn.setValidations.for = addValidationToInputField;
 
     var validationFunctions = {
         zip: validateZip,
@@ -30,7 +32,28 @@
         onError: function() {}          // called when a form fails validation and recieves that form as an argument
     }
 
-    var settings = $.extend({}, defaults, options);
+    /**
+     * Abstraction of the validateForm method adopted for jQuery prototyping
+     */
+    function jQueryValidatesForm(options) {
+        if (this.not(this.filter('form'))[0]) {
+            console.error('Attempting to set validations on a non-form element');
+            return;
+        }
+        var settings = $.extend({}, defaults, options);
+        this.submit({settings: settings}, validateForm);
+        return this;
+    }
+
+    /**
+     * Sets validations on all forms using (TODO) options argument passed or existing html data-attributes
+     *
+     * @param options   hash defining callback methods for individual inputs and forms on success and error of validations
+     */
+    function validateAllForms(options) {
+        var settings = $.extend({}, defaults, options);
+        $('form').submit({settings: settings}, validateForm);
+    }
 
     //  Abstract this out to a function on the jQuery object (maybe just a global function);
     //  TODO: an exposed version of this function which can be called on an individual form
@@ -39,7 +62,7 @@
     /**
      * Validates a single form.  Assumes that it is being called from within the scope of the form object.
      */
-    function validateForm() {
+    function validateForm(e) {
         var validated = true;
         var validations;
 
@@ -51,39 +74,42 @@
             for (var i in validations) {
                 try {
                     if (!validationFunctions[validations[i]]($(this))) {
-                        settings.onInvalidated($(this));
+                        e.data.settings.onInvalidated($(this));
                         inputValidated = validated = false;
+                        console.log('error on: ', validations[i]);
                         break;
                     }
                 } catch (e) {
-                    console.error(e.description);
-                    console.error("Invalid validation argument: ", validates[i]);
+                    console.error(e);
+                    console.error("Invalid validation argument: ", validations[i]);
                 }
             }
-            if (inputValidated) settings.onValidated($(this));
+            if (inputValidated) e.data.settings.onValidated($(this));
         });
 
         // After iterating through each input, return the validated state, and perform any onError, or onSuccess functions
         if (validated) {
-            return onSuccess();
+            console.log('success');
+            return onSuccess(e.data.settings.onSuccess);
         } else {
-            return onError();
+            console.log('error');
+            return onError(e.data.settings.onError);
         }
     }
 
     /**
      * Calls the onSuccess callback and returns true (allowing the form to submit).
      */
-    function onSuccess() {
-        settings.onSuccess();
+    function onSuccess(callback) {
+        callback();
         return true;
     }
 
     /**
      * Calls the onError callback and returns false (preventing the form from submitting).
      */
-    function onError() {
-        settings.onError();
+    function onError(callback) {
+        callback();
         return false;
     }
 
@@ -94,15 +120,18 @@
      */
 
     function validateEmail($input) {
-        if ($input.val().match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i)) {
+        if (!$input.val()) return true;
+        if ($input.val().match(/^[\w0-9._%+-]+@[\w0-9.-]+\.[A-Z]{2,4}$/i)) {
+            return true;
         } else {
             $input.addClass('error');
             return false;
         }
     }
     function validatePresence($input) {
-        if ($input.val() == defaultValue) return false;
+        if ($input.val() == $input.data('defaultvalue')) return false;
         if (!$input.val()) return false;
+        return true;
     }
     function validateZip($input) {
         if (!$input.val()) return true;
@@ -111,7 +140,8 @@
     function validatePhoneNumber($input) {
         var defaultValue = $input.data('defaultvalue');
         if ($input.val() == defaultValue) return false;
-        if ($input.val().match()) {
+        // Copy this regex from hv
+        if ($input.val().match(/ /)) {
             return true;
         } else {
             return false;
