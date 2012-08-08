@@ -3,6 +3,7 @@
  *  $.validates => object level namespace
  *      ()          => shorthand for allForms TODO: implement this
  *      .allForms() => performs validations on all forms and their inputs TODO: implement this
+ *      .newValidation() => programatically adds a custom validation to the lib PRIORITY!!! TODO: implement this
  *
  *  $.fn.validates => prototypal namespace
  *      () => sets up form validations for this collection
@@ -64,17 +65,18 @@
      */
     function validateForm(e) {
         var validated = true;
-        var validations;
+        var $thisForm = $(this);
 
         // May want to expand this to textAreas and select dropdowns...
-        $(this).find('input[data-validates]').each(function() {
-            // $(this) now refers to the input objects in the form
+        $thisForm.find('input[data-validates]').each(function() {
+            var $thisInput = $(this);
             var inputValidated = true;
-            validations = $(this).data('validates').split(' ');
+            var validations = $thisInput.data('validates').split(' ');
+
             for (var i in validations) {
                 try {
-                    if (!validationFunctions[validations[i]]($(this))) {
-                        e.data.settings.onInvalidated($(this));
+                    if (!validationFunctions[validations[i]]($thisInput)) {
+                        e.data.settings.onInvalidated($thisInput);
                         inputValidated = validated = false;
                         console.log('error on: ', validations[i]);
                         break;
@@ -84,32 +86,32 @@
                     console.error("Invalid validation argument: ", validations[i]);
                 }
             }
-            if (inputValidated) e.data.settings.onValidated($(this));
+            if (inputValidated) e.data.settings.onValidated($thisInput);
         });
 
         // After iterating through each input, return the validated state, and perform any onError, or onSuccess functions
         if (validated) {
             console.log('success');
-            return onSuccess(e.data.settings.onSuccess);
+            return onSuccess($thisForm, e.data.settings.onSuccess);
         } else {
             console.log('error');
-            return onError(e.data.settings.onError);
+            return onError($thisForm, e.data.settings.onError);
         }
     }
 
     /**
      * Calls the onSuccess callback and returns true (allowing the form to submit).
      */
-    function onSuccess(callback) {
-        callback();
+    function onSuccess($form, callback) {
+        callback($form);
         return true;
     }
 
     /**
      * Calls the onError callback and returns false (preventing the form from submitting).
      */
-    function onError(callback) {
-        callback();
+    function onError($form, callback) {
+        callback($form);
         return false;
     }
 
@@ -136,12 +138,11 @@
     function validateZip($input) {
         if (!$input.val()) return true;
         if ($input.val().match(/(^|[^\d])\d{5}[^\d]/)) return true;
+        return false;
     }
     function validatePhoneNumber($input) {
-        var defaultValue = $input.data('defaultvalue');
-        if ($input.val() == defaultValue) return false;
-        // Copy this regex from hv
-        if ($input.val().match(/ /)) {
+        if (!$input.val()) return true;
+        if ($input.val().match(/^1?[^\d]?\d{3}[^\d]?\d{3}[^\d]?\d{4}$/)) {
             return true;
         } else {
             return false;

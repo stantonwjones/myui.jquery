@@ -6,15 +6,28 @@
     </head>
     <body>
         <form>
+            <p class="errorMessage" style="color: red; display: none">Please review the required fields</p>
             <label>Email</label>
             <input type="text" data-validates="email presence" />
             <input type="submit" />
         </form>
         <script>
-            $('form').submit(function(e) {
-                e.preventDefault();
+            $.setValidations({onError: onError, onInvalidated: onInvalidated});
+            function onError($form) {
+                $form.find('.errorMessage').show();
+            }
+            function onInvalidated($input) {
+                $input.siblings('label').addClass('error');
+                $input.addClass('error');
+            }
+            $('input').on('focus input change', function() {
+                $(this).removeClass('error').siblings('label').removeClass('error');
             });
-            $.setValidations();
         </script>
+        <style type="text/css">
+            .error {
+                color: red;
+            }
+        </style>
     </body>
 </html>
