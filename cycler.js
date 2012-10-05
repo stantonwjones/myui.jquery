@@ -85,26 +85,28 @@ function Carousel( $carousel, options ) {
         var carouselCss = {
             position: 'relative',
             height: Math.max.apply(Math, itemHeights)
-        }
+        };
         var carouselItemCss = {
             position: 'absolute'
-        }
+        };
         var carouselWindowCss = {
             overflow: 'hidden'
-        }
+        };
 
         $carousel.css(carouselCss);
-        $carouselItems.css(carouselItemCss);
-        $carouselWindow.css(carouselWindowCss);
+        $carouselItems.css( carouselItemCss );
+        $carouselWindow.css( carouselWindowCss );
     }
 
     /**
      * Performs transition to next state of the carousel
      */
     function next() {
+
         console.log('next method fired');
         currentPosition++;
         transition();
+
     }
 
     /**

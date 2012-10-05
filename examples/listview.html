@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+    <head>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script type="text/javascript" src="libs/underscore.min.js"></script>
+        <script type="text/javascript" src="../listview.js"></script>
+    </head>
+    <body>
+        <script id="listTemplate" type="application/x-template">
+            <li>
+                <h1><%= title %></h1>
+                <div><%= content %></div>
+            </li>
+        </script>
+        <ul id="container">
+            <a href="javascript: applyListView()">Init List View</a>
+        </ul>
+        <script type="text/javascript">
+            var data = [
+                {
+                    title: 'one',
+                    content: 'I am number one',
+                    group: 'odd'
+                },
+                {
+                    title: 'two',
+                    content: 'I am number two',
+                    group: 'even'
+                },
+                {
+                    title: 'three',
+                    content: 'I am number three',
+                    group: 'odd'
+                },
+                {
+                    title: 'four',
+                    content: 'I am number four',
+                    group: 'even'
+                },
+                {
+                    title: 'five',
+                    content: 'I am number five',
+                    group: 'odd'
+                }
+            ];
+            var template = _.template($('#listTemplate').html());
+            var params = {
+                template: template,
+                data: data
+            };
+            var listView;
+            function applyListView() {
+                listView = $('#container').listView(params).data('listView');
+            }
+        </script>
+    </body>
+</html>
