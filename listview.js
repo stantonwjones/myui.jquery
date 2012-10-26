@@ -67,7 +67,6 @@
             return true;
         });
         return filteredData;
-
     }
 
 })(jQuery);

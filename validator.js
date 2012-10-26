@@ -68,7 +68,7 @@
         var $thisForm = $(this);
 
         // May want to expand this to textAreas and select dropdowns...
-        $thisForm.find('input[data-validates]').each(function() {
+        $thisForm.find('input[data-validates], select[data-validates]').not('[disabled]').each(function() {
             var $thisInput = $(this);
             var inputValidated = true;
             var validations = $thisInput.data('validates').split(' ');
